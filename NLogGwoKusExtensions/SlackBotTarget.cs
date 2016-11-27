@@ -15,6 +15,9 @@ namespace NLogGwoKusExtensions
 		[RequiredParameter]
 		public string ApiKey { get; set; }
 
+		[RequiredParameter]
+		public string Channel { get; set; }
+
 		public SlackBotTarget()
 		{
 			
