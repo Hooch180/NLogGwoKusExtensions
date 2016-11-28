@@ -62,7 +62,7 @@ namespace NLogGwoKusExtensions
 		/// </summary>
 		public bool ThrowExceptions { get; set; }
 
-		private RestClient restClient;
+		private IRestClient restClient;
 		private string slackDomain;
 
 		public SlackBotTarget()
@@ -82,6 +82,27 @@ namespace NLogGwoKusExtensions
 					var fullSlackApiUrl = new Uri($@"http://{slackDomain}.slack.com/api/");
 					restClient = new RestClient(fullSlackApiUrl);
 				}
+			}
+			catch (Exception)
+			{
+				if(ThrowExceptions)
+					throw;
+			}
+
+			Write(logEvent, restClient);
+		}
+
+		public void Write(LogEventInfo logEvent, IRestClient customRestClient)
+		{
+			try
+			{
+				if (logEvent == null)
+					return;
+
+				if (customRestClient == null)
+				{
+					throw new ArgumentNullException(nameof(customRestClient));
+				}
 
 				var request = new RestRequest(@"chat.postMessage", Method.GET);
 				request.AddParameter("token", ApiKey);
@@ -97,7 +118,7 @@ namespace NLogGwoKusExtensions
 				if (IconUrl != null && Emoji == null)
 					request.AddParameter("icon_url", IconUrl);
 
-				var response = restClient.Execute(request);
+				var response = customRestClient.Execute(request);
 				if (response.StatusCode != HttpStatusCode.OK)
 					throw new NLogRuntimeException($"Error response code from Slack. Code: {response.StatusCode}.");
 
@@ -110,7 +131,7 @@ namespace NLogGwoKusExtensions
 			}
 			catch (Exception)
 			{
-				if(ThrowExceptions)
+				if (ThrowExceptions)
 					throw;
 			}
 		}
