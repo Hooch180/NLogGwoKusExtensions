@@ -24,8 +24,8 @@ namespace NLogGwoKusExtensions
 			get { return slackDomain; }
 			set
 			{
-				slackDomain = value; 
-				restClient = new RestClient($@"http://{value}.slack.com/api/");
+				slackDomain = value;
+				restClient = null;
 			}
 		}
 
@@ -77,6 +77,12 @@ namespace NLogGwoKusExtensions
 		{
 			try
 			{
+				if (restClient == null)
+				{
+					var fullSlackApiUrl = new Uri($@"http://{slackDomain}.slack.com/api/");
+					restClient = new RestClient(fullSlackApiUrl);
+				}
+
 				var request = new RestRequest(@"chat.postMessage", Method.GET);
 				request.AddParameter("token", ApiKey);
 				request.AddParameter("channel", Channel);
