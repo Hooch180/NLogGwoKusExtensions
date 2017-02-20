@@ -20,8 +20,8 @@ namespace NLogGwoKusExtensions.Tests
 		public PushbulletTargetTests()
 		{
 			apiUrl = @"https://api.pushbullet.com/v2/";
-			apiToken = "o.H0Mfas88PSv3TiUCvPvRzvaXYumfHw1S";
-			channelTag = "nloggwokusextensionstag";
+			apiToken = "";
+			channelTag = "";
 
 			var goodResponseJObject = new JObject
 			{
@@ -56,7 +56,7 @@ namespace NLogGwoKusExtensions.Tests
 		public void PushToChannel_RestClientIsOkAndChanellTagIsNull_DoesThrowException()
 		{
 			var pushbulletTarget = new PushbulletTarget { ApiToken = apiToken, MessagesTitle = "Title logger"};
-			LogEventInfo logEvent = new LogEventInfo {Message = "error message :("};
+			var logEvent = new LogEventInfo {Message = "error message :("};
 			IRestClient restClient = new RestClient(apiUrl);
 
 			pushbulletTarget.PushToChannel(logEvent, restClient);
@@ -66,7 +66,7 @@ namespace NLogGwoKusExtensions.Tests
 		public void PushToChannel_RestClientIsOkAndChanellTagIsNotNull_DoesThrowException()
 		{
 			var pushbulletTarget = new PushbulletTarget { ApiToken = apiToken, ChannelTag = channelTag, MessagesTitle = "Title logger" };
-			LogEventInfo logEvent = new LogEventInfo { Message = "error message :(" };
+			var logEvent = new LogEventInfo { Message = "error message :(" };
 			IRestClient restClient = new RestClient(apiUrl);
 
 			pushbulletTarget.PushToChannel(logEvent, restClient);
@@ -76,7 +76,7 @@ namespace NLogGwoKusExtensions.Tests
 		public void PushToChannel_RestClientIsNull_hrowException()
 		{
 			var pushbulletTarget = new PushbulletTarget { ApiToken = apiToken, ChannelTag = channelTag, MessagesTitle = "Title logger", ThrowExceptions = true };
-			LogEventInfo logEvent = new LogEventInfo { Message = "error message :(" };
+			var logEvent = new LogEventInfo { Message = "error message :(" };
 
 			Assert.Throws<ArgumentNullException>(() => pushbulletTarget.PushToChannel(logEvent, null));
 		}
@@ -85,7 +85,7 @@ namespace NLogGwoKusExtensions.Tests
 		public void PushToChannel_ThrowExceptionsIsFalseAndBedParameters_DoesThrowException()
 		{
 			var pushbulletTarget = new PushbulletTarget { ThrowExceptions = false};
-			LogEventInfo logEvent = new LogEventInfo { Message = "error message :(" };
+			var logEvent = new LogEventInfo { Message = "error message :(" };
 			IRestClient restClient = new RestClient(apiUrl);
 
 			pushbulletTarget.PushToChannel(logEvent, restClient);
@@ -95,7 +95,7 @@ namespace NLogGwoKusExtensions.Tests
 		public void PushToChannel_ThrowExceptionsIsTrueAndBedParameters_ThrowException()
 		{
 			var pushbulletTarget = new PushbulletTarget { ThrowExceptions = true };
-			LogEventInfo logEvent = new LogEventInfo { Message = "error message :(" };
+			var logEvent = new LogEventInfo { Message = "error message :(" };
 			IRestClient restClient = new RestClient(apiUrl);
 			
 			Assert.Throws<NLogRuntimeException>(() => pushbulletTarget.PushToChannel(logEvent, restClient));
