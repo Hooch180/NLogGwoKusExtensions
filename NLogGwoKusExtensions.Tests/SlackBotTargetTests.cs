@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NLog;
 using Xunit;
 using NSubstitute;
-using NLogGwoKusExtensions;
 using RestSharp;
 
 namespace NLogGwoKusExtensions.Tests
@@ -16,22 +12,21 @@ namespace NLogGwoKusExtensions.Tests
 
 	public class SlackBotTargetTests
 	{
-		private string apiKey;
-		private string goodResponseJson;
-		private string badResponseJson;
-		private IRestResponse goodResponse;
-		private IRestResponse badResponse;
-		private IRestResponse notFoundResponse;
+		private readonly string apiKey;
+
+		private readonly IRestResponse goodResponse;
+		private readonly IRestResponse badResponse;
+		private readonly IRestResponse notFoundResponse;
 
 		public SlackBotTargetTests()
 		{
 			apiKey = "botApiKey";
 
-			JObject goodResponseJObject = new JObject
+			var goodResponseJObject = new JObject
 			{
 				["ok"] = true
 			};
-			goodResponseJson = goodResponseJObject.ToString();
+			var goodResponseJson = goodResponseJObject.ToString();
 			goodResponse = new RestResponse
 			{
 				StatusCode = HttpStatusCode.OK,
@@ -43,7 +38,7 @@ namespace NLogGwoKusExtensions.Tests
 				["ok"] = false,
 				["error"] = "test_error"
 			};
-			badResponseJson = badResponseJObject.ToString();
+			var badResponseJson = badResponseJObject.ToString();
 			badResponse = new RestResponse
 			{
 				StatusCode = HttpStatusCode.OK,
@@ -59,35 +54,43 @@ namespace NLogGwoKusExtensions.Tests
 		[Fact]
 		public void ThrowsNullOnNullRestClient()
 		{
-			SlackBotTarget slackTarget = new SlackBotTarget();
-			slackTarget.ThrowExceptions = true;
+			var slackTarget = new SlackBotTarget
+			{
+				ThrowExceptions = true
+			};
+
 			Assert.Throws<ArgumentNullException>(() => slackTarget.Write(new LogEventInfo(), null));
 		}
 
 		[Fact]
 		public void DoesNotThrowOnNullLogEventInfo()
 		{
-			SlackBotTarget slackTarget = new SlackBotTarget();
-			slackTarget.ThrowExceptions = true;
+			var slackTarget = new SlackBotTarget
+			{
+				ThrowExceptions = true
+			};
+
 			slackTarget.Write(null, null);
 		}
 
 		[Fact]
 		public void RequiredParametersPresentRequest()
 		{
-			SlackBotTarget slackTarget = new SlackBotTarget();
-			slackTarget.ApiKey = "testKey";
-			slackTarget.Channel = "testChannel";
-			
+			var slackTarget = new SlackBotTarget
+			{
+				ApiKey = "testKey",
+				Channel = "testChannel"
+			};
+
 			var restClient = Substitute.For<IRestClient>();
 			restClient.Execute(Arg.Any<IRestRequest>()).Returns(r =>
 			{
-				IRestRequest request = (IRestRequest) r[0];
+				IRestRequest request = (IRestRequest)r[0];
 				Assert.Equal(Method.GET, request.Method);
 				Assert.Equal(1, request.Parameters.Count(p => p.Name == "token" && (string)p.Value == "testKey"));
 				Assert.Equal(1, request.Parameters.Count(p => p.Name == "channel" && (string)p.Value == "testChannel"));
 				Assert.Equal(1, request.Parameters.Count(p => p.Name == "text" && (string)p.Value == "testMessage"));
-				
+
 				return goodResponse;
 			});
 
@@ -97,16 +100,18 @@ namespace NLogGwoKusExtensions.Tests
 		[Fact]
 		public void AllParametersPresentRequest()
 		{
-			SlackBotTarget slackTarget = new SlackBotTarget();
-			slackTarget.ApiKey = "testKey";
-			slackTarget.Channel = "testChannel";
-			slackTarget.UserName = "testUserName";
-			slackTarget.Emoji = ":testEmoji:";
+			var slackTarget = new SlackBotTarget
+			{
+				ApiKey = "testKey",
+				Channel = "testChannel",
+				UserName = "testUserName",
+				Emoji = ":testEmoji:"
+			};
 
 			var restClient = Substitute.For<IRestClient>();
 			restClient.Execute(Arg.Any<IRestRequest>()).Returns(r =>
 			{
-				IRestRequest request = (IRestRequest)r[0];
+				var request = (IRestRequest)r[0];
 				Assert.Equal(Method.GET, request.Method);
 				Assert.Equal(1, request.Parameters.Count(p => p.Name == "token" && (string)p.Value == "testKey"));
 				Assert.Equal(1, request.Parameters.Count(p => p.Name == "channel" && (string)p.Value == "testChannel"));
@@ -123,11 +128,13 @@ namespace NLogGwoKusExtensions.Tests
 		[Fact]
 		public void IconUrlNotSetWhenEmojiSet()
 		{
-			SlackBotTarget slackTarget = new SlackBotTarget();
-			slackTarget.ApiKey = "testKey";
-			slackTarget.Channel = "testChannel";
-			slackTarget.Emoji = ":testEmoji:";
-			slackTarget.IconUrl = "testIcon";
+			var slackTarget = new SlackBotTarget
+			{
+				ApiKey = "testKey",
+				Channel = "testChannel",
+				Emoji = ":testEmoji:",
+				IconUrl = "testIcon"
+			};
 
 			var restClient = Substitute.For<IRestClient>();
 			restClient.Execute(Arg.Any<IRestRequest>()).Returns(r =>
@@ -146,15 +153,17 @@ namespace NLogGwoKusExtensions.Tests
 		[Fact]
 		public void IconUrlSetWhenEmojiNotSet()
 		{
-			SlackBotTarget slackTarget = new SlackBotTarget();
-			slackTarget.ApiKey = "testKey";
-			slackTarget.Channel = "testChannel";
-			slackTarget.IconUrl = "testIcon";
+			var slackTarget = new SlackBotTarget
+			{
+				ApiKey = "testKey",
+				Channel = "testChannel",
+				IconUrl = "testIcon"
+			};
 
 			var restClient = Substitute.For<IRestClient>();
 			restClient.Execute(Arg.Any<IRestRequest>()).Returns(r =>
 			{
-				IRestRequest request = (IRestRequest)r[0];
+				var request = (IRestRequest)r[0];
 
 				Assert.Equal(0, request.Parameters.Count(p => p.Name == "icon_url"));
 
@@ -167,16 +176,18 @@ namespace NLogGwoKusExtensions.Tests
 		[Fact]
 		public void ThrowsExceptionWitErrorFromApi()
 		{
-			SlackBotTarget slackTarget = new SlackBotTarget();
-			slackTarget.ApiKey = "testKey";
-			slackTarget.Channel = "testChannel";
-			slackTarget.IconUrl = "testIcon";
-			slackTarget.ThrowExceptions = true;
+			var slackTarget = new SlackBotTarget
+			{
+				ApiKey = "testKey",
+				Channel = "testChannel",
+				IconUrl = "testIcon",
+				ThrowExceptions = true
+			};
 
 			var restClient = Substitute.For<IRestClient>();
 			restClient.Execute(Arg.Any<IRestRequest>()).Returns(r =>
 			{
-				IRestRequest request = (IRestRequest)r[0];
+				var request = (IRestRequest)r[0];
 				return badResponse;
 			});
 
@@ -190,8 +201,6 @@ namespace NLogGwoKusExtensions.Tests
 			{
 				Assert.Contains("test_error", ex.Message);
 			}
-			
-
 		}
 	}
 }
