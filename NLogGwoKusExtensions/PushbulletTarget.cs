@@ -7,7 +7,7 @@ using RestSharp;
 
 namespace NLogGwoKusExtensions
 {
-	[Target("Pushbullet")]
+	[Target("PushbulletTarget")]
 	public sealed class PushbulletTarget : TargetWithLayout
 	{
 		/// <summary>
@@ -23,7 +23,7 @@ namespace NLogGwoKusExtensions
 		public string MessagesTitle { get; set; }
 
 		/// <summary>
-		/// Optional channel token without "@" at the begining.
+		/// Optional channel tag without "@" at the begining.
 		/// If no channel is set, notification is send to all users devices.
 		/// </summary>
 		public string ChannelTag { get; set; }
@@ -73,11 +73,12 @@ namespace NLogGwoKusExtensions
 		/// Pushesh log messagee to Pushbulleet channel or user.
 		/// </summary>
 		/// <param name="logEventInfo"></param>
-		public void PushToChannel(LogEventInfo logEvent, IRestClient customRestClient)
+		/// <param name="customRestClient"></param>
+		public void PushToChannel(LogEventInfo logEventInfo, IRestClient customRestClient)
 		{
 			try
 			{
-				if (logEvent == null)
+				if (logEventInfo == null)
 					return;
 
 				if (customRestClient == null)
@@ -87,7 +88,7 @@ namespace NLogGwoKusExtensions
 				request.AddHeader("Access-Token", ApiToken);
 				request.AddParameter("type", "note", ParameterType.GetOrPost);
 				request.AddParameter("title", MessagesTitle, ParameterType.GetOrPost);
-				request.AddParameter("body", logEvent.Message, ParameterType.GetOrPost);
+				request.AddParameter("body", logEventInfo.Message, ParameterType.GetOrPost);
 
 				if (!string.IsNullOrEmpty(ChannelTag))
 					request.AddParameter("channel_tag", ChannelTag, ParameterType.GetOrPost);
