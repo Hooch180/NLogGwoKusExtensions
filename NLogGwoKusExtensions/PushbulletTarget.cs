@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using Newtonsoft.Json.Linq;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -96,13 +95,6 @@ namespace NLogGwoKusExtensions
 				var response = customRestClient.Execute(request);
 				if (response.StatusCode != HttpStatusCode.OK)
 					throw new NLogRuntimeException($"Error response code from Pushbullet. Code: {response.StatusCode}.");
-
-				var responseParsed = JObject.Parse(response.Content);
-				if ((bool)responseParsed["ok"] != true)
-				{
-					string message = $"Error returned from Pushbullet Api: {responseParsed["error"]}";
-					throw new NLogRuntimeException(message);
-				}
 			}
 			catch (Exception)
 			{
